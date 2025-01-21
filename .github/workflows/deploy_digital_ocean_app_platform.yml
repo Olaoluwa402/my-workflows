@@ -1,64 +1,73 @@
-name: Deploy to DigitalOcean App Platform
+name: DigitalOcean App Platform Deployment
 
 on:
+  # The workflow is triggered manually with secrets and inputs passed
   workflow_call:
-    inputs:
-      app_name:
-        description: "Name of the app on DigitalOcean App Platform"
-        required: true
-        type: string
-      component_name:
-        description: "Component name of the app (e.g., backend service)"
-        required: true
-        type: string
-      repository:
-        description: "Docker repository for the app"
-        required: true
-        type: string
-      tag:
-        description: "Docker image tag"
-        required: true
-        type: string
     secrets:
+      # DigitalOcean Access Token (used for authentication with DigitalOcean API)
       access_token:
-        description: "DigitalOcean API access token"
+        description: Digital Ocean Access Token
         required: true
+
+      # Docker Hub Registry Name (for Docker image registry, e.g., "docker.io")
       registry:
-        description: "Docker Hub username"
+        description: Docker Hub Registry Name
+        required: true
+
+    inputs:
+      # The name of the app to deploy on DigitalOcean App Platform
+      app_name:
+        description: App Name
+        type: string
+        required: true
+
+      # The name of the component within the app spec
+      component_name:
+        description: Name of the component in App Spec
+        type: string
+        required: true
+
+      # The Docker Hub repository where the Docker image is stored
+      repository:
+        description: Docker Hub Repository Name
+        type: string
+        required: true
+
+      # The image tag name for the Docker image to deploy
+      tag:
+        description: Image Tag Name
+        type: string
         required: true
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Runs on the latest Ubuntu environment
 
     steps:
-      # Step 1: Install DigitalOcean CLI (doctl)
-      - name: Install doctl (DigitalOcean CLI)
-        run: |
-          curl -sL https://github.com/digitalocean/doctl/releases/download/v1.90.0/doctl-1.90.0-linux-amd64.tar.gz | tar xz
-          sudo mv doctl /usr/local/bin
+      - name: DigitalOcean App Platform deployment
+        uses: digitalocean/app_action@v1.1.5  # Uses the DigitalOcean app_action to deploy to the App Platform
+        with:
+          # The app name is passed from the input values
+          app_name: ${{ inputs.app_name}}
 
-      # Step 2: Authenticate with DigitalOcean
-      - name: Authenticate with DigitalOcean
-        run: doctl auth init -t ${{ secrets.access_token }}
+          # The access token is passed from the secrets (used for authentication with DigitalOcean)
+          token: ${{ secrets.access_token }}
 
-      # Step 3: Set environment variables for the DigitalOcean app platform
-      - name: Set environment variables for deployment
-        run: |
-          echo "APP_NAME=${{ inputs.app_name }}" >> $GITHUB_ENV
-          echo "COMPONENT_NAME=${{ inputs.component_name }}" >> $GITHUB_ENV
-          echo "REPOSITORY=${{ inputs.repository }}" >> $GITHUB_ENV
-          echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
-          echo "REGISTRY=${{ secrets.registry }}" >> $GITHUB_ENV
-
-      # Step 4: Deploy to DigitalOcean App Platform
-      - name: Deploy to DigitalOcean App Platform
-        run: |
-          # Update app with the new Docker image
-          doctl apps update $APP_NAME --component $COMPONENT_NAME --image $REGISTRY/$REPOSITORY:$TAG
-
-      # Step 5: Verify the deployment
-      - name: Check App Status
-        run: |
-          doctl apps get $APP_NAME --json
-          echo "Deployment complete for app $APP_NAME."
+          # The images to deploy are specified in JSON format. It contains:
+          # - "name": The component name within the app.
+          # - "registry_type": Specifies the type of registry (in this case, Docker Hub).
+          # - "registry": The Docker Hub registry name, passed from secrets.
+          # - "repository": The repository name where the Docker image is stored, passed from inputs.
+          # - "tag": The tag for the image to deploy, passed from inputs.
+          images: '[ 
+            {
+              "name": "${{ inputs.component_name }}", 
+              "image": {
+                "registry_type": "DOCKER_HUB",
+                "registry": "${{ secrets.registry }}",
+                "repository": "${{ inputs.repository }}",
+                "tag": "${{ inputs.tag }}"
+              }
+            }
+          ]'
+s
