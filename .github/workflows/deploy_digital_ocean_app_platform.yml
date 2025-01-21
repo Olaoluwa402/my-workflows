@@ -1,39 +1,32 @@
 name: DigitalOcean App Platform Deployment
 
 on:
-  # The workflow is triggered manually with secrets and inputs passed
   workflow_call:
     secrets:
-      # DigitalOcean Access Token (used for authentication with DigitalOcean API)
       access_token:
         description: Digital Ocean Access Token
         required: true
 
-      # Docker Hub Registry Name (for Docker image registry, e.g., "docker.io")
       registry:
         description: Docker Hub Registry Name
         required: true
 
     inputs:
-      # The name of the app to deploy on DigitalOcean App Platform
       app_name:
         description: App Name
         type: string
         required: true
 
-      # The name of the component within the app spec
       component_name:
         description: Name of the component in App Spec
         type: string
         required: true
 
-      # The Docker Hub repository where the Docker image is stored
       repository:
         description: Docker Hub Repository Name
         type: string
         required: true
 
-      # The image tag name for the Docker image to deploy
       tag:
         description: Image Tag Name
         type: string
@@ -41,32 +34,21 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Runs on the latest Ubuntu environment
+    runs-on: ubuntu-latest
 
     steps:
       - name: DigitalOcean App Platform deployment
-        uses: digitalocean/app_action@v1.1.5  # Uses the DigitalOcean app_action to deploy to the App Platform
+        uses: digitalocean/app_action@v1.1.5
         with:
-          # The app name is passed from the input values
           app_name: ${{ inputs.app_name}}
-
-          # The access token is passed from the secrets (used for authentication with DigitalOcean)
           token: ${{ secrets.access_token }}
-
-          # The images to deploy are specified in JSON format. It contains:
-          # - "name": The component name within the app.
-          # - "registry_type": Specifies the type of registry (in this case, Docker Hub).
-          # - "registry": The Docker Hub registry name, passed from secrets.
-          # - "repository": The repository name where the Docker image is stored, passed from inputs.
-          # - "tag": The tag for the image to deploy, passed from inputs.
-          images: '[ 
+          images: '[
             {
-              "name": "${{ inputs.component_name }}", 
-              "image": {
-                "registry_type": "DOCKER_HUB",
-                "registry": "${{ secrets.registry }}",
-                "repository": "${{ inputs.repository }}",
-                "tag": "${{ inputs.tag }}"
-              }
-            }
-          ]'
+            "name": "${{ inputs.component_name}}",
+            "image":{
+            "registry_type": "DOCKER_HUB",
+            "registry": "${{ secrets.registry }}",
+            "repository": "${{ inputs.repository }}",
+            "tag": "${{ inputs.tag}}"
+            },
+            ]'
