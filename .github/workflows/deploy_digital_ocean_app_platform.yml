@@ -42,13 +42,16 @@ jobs:
         with:
           app_name: ${{ inputs.app_name}}
           token: ${{ secrets.access_token }}
-          images: '[
-            {
-            "name": "${{ inputs.component_name}}",
-            "image":{
-            "registry_type": "DOCKER_HUB",
-            "registry": "${{ secrets.registry }}",
-            "repository": "${{ inputs.repository }}",
-            "tag": "${{ inputs.tag}}"
-            }
-          ]'
+          images:
+            [
+              {
+                "name": "${{ inputs.component_name }}",
+                "image":
+                  {
+                    "registry_type": "DOCKER_HUB",
+                    "registry": "${{ secrets.registry }}",
+                    "repository": "${{ inputs.repository }}",
+                    "tag": "${{ inputs.tag }}",
+                  },
+              },
+            ]
