@@ -40,18 +40,17 @@ jobs:
       - name: DigitalOcean App Platform deployment
         uses: digitalocean/app_action@v1.1.5
         with:
-          app_name: ${{ inputs.app_name}}
+          app_name: ${{ inputs.app_name }}
           token: ${{ secrets.access_token }}
-          images:
+          images: >
             [
               {
                 "name": "${{ inputs.component_name }}",
-                "image":
-                  {
-                    "registry_type": "DOCKER_HUB",
-                    "registry": "${{ secrets.registry }}",
-                    "repository": "${{ inputs.repository }}",
-                    "tag": "${{ inputs.tag }}",
-                  },
-              },
+                "image": {
+                  "registry_type": "DOCKER_HUB",
+                  "registry": "${{ secrets.registry }}",
+                  "repository": "${{ inputs.repository }}",
+                  "tag": "${{ inputs.tag }}"
+                }
+              }
             ]
