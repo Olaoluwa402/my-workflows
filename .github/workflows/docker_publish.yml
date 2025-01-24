@@ -45,4 +45,6 @@ jobs:
         with:
           context: . # The build context is the root directory of the repository
           push: true # Enable image pushing to Docker Hub
-          tags: ${{ secrets.docker_username }}/${{ inputs.image_name }}:${{ inputs.tag }} # Full image name with username, image name, and tag
+          tags: |
+            ${{ secrets.docker_username }}/${{ inputs.image_name }}:${{ inputs.tag }}
+            ${{ secrets.docker_username }}/${{ inputs.image_name }}:latest
